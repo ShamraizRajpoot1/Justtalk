@@ -1,13 +1,15 @@
-import {View, Text, Animated} from 'react-native';
+import {
+  View,
+  Text,
+  Animated,
+  StyleSheet,
+  ScrollView,
+  Modal,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {SafeAreaView, TouchableOpacity, Image, StatusBar} from 'react-native';
 
 const Home = ({navigation}) => {
-  // const homeparty =() => {
-  //   navigation.navigate('Home');
-  //   showPartyView()
-  // }
-
   const [showFoodView, setShowFoodView] = useState(false);
   const Food = () => {
     setShowFoodView(true);
@@ -98,47 +100,99 @@ const Home = ({navigation}) => {
       }).start();
     }
   }, [showPartyView, slideAnimation]);
+  const [showRaveView, setShowRaveView] = useState(false);
+  const Rave = () => {
+    setShowRaveView(true);
+  };
+
+  useEffect(() => {
+    if (showRaveView) {
+      Animated.spring(slideAnimation, {
+        toValue: 1,
+        useNativeDriver: true,
+        duration: 300,
+      }).start();
+    }
+  }, [showRaveView, slideAnimation]);
+
+  const MyModal = ({
+    visible,
+    onCloseModal,
+    navigation,
+    imageSource,
+    title,
+    popuptext,
+    image,
+  }) => {
+    const [fadeAnim] = useState(new Animated.Value(0));
+
+    const handleModalOpen = () => {
+      Animated.spring(fadeAnim, {
+        toValue: 1,
+        useNativeDriver: true,
+        duration: 300,
+      }).start();
+    };
+
+    const handleModalClose = () => {
+      Animated.spring(fadeAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        duration: 200,
+      }).start(() => onCloseModal());
+    };
+
+    useEffect(() => {
+      if (visible) {
+        handleModalOpen();
+      }
+    }, [visible]);
+
+    return (
+      <Modal transparent visible={visible} onRequestClose={handleModalClose}>
+        <TouchableOpacity
+          style={styles.modalBackground}
+          activeOpacity={1}
+          onPress={handleModalClose}>
+          <View style={styles.modalContainer}>
+            <Animated.View style={[styles.popup, {opacity: fadeAnim}]}>
+              <Image source={imageSource} style={styles.image} />
+              <View style={styles.popupbody}>
+                <Text style={styles.popupheader}>{title}</Text>
+                <Text style={styles.popuptext}>{popuptext}</Text>
+              </View>
+              <View style={styles.buttonarea}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('Chats', {image: image, title});
+                    handleModalClose();
+                  }}
+                  style={styles.button}>
+                  <Text style={styles.buttonText}>START TALK</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
   return (
     <>
       <StatusBar backgroundColor="#F6CD5B" barStyle="dark-content" />
-      <SafeAreaView
-        style={{backgroundColor: '#FFFFFF', width: '100%', height: '100%'}}>
-        <View
-          style={{
-            backgroundColor: '#F6CD5B',
-            height: 66,
-            borderBottomWidth: 1,
-            borderBottomColor: '#ACAA7E59',
-            justifyContent: 'center',
-            elevation: 2,
-          }}>
+
+      <View style={styles.container}>
+        <View style={styles.header}>
           <Image
             source={require('../Assets/homelogo.png')}
             style={{marginLeft: 21}}
           />
         </View>
-        <View style={{alignItems: 'center', marginTop: 41.5}}>
-          <Text
-            style={{
-              color: '#111820',
-              fontWeight: 'bold',
-              fontFamily: 'Oxygen',
-              fontSize: 24,
-            }}>
-            These Chatrooms, You Bet!
-          </Text>
-          <Text
-            style={{
-              marginTop: 12,
-              color: '#111820',
-              fontWeight: 'bold',
-              fontFamily: 'Oxygen',
-              fontSize: 18,
-            }}>
-            Join Any Room Now
-          </Text>
+        <View style={styles.textbody}>
+          <Text style={styles.boldtext}>These Chatrooms, You Bet!</Text>
+          <Text style={styles.text}>Join Any Room Now</Text>
         </View>
-        <View style={{alignItems: 'center', marginTop: 63}}>
+        <View style={styles.body}>
           <Image source={require('../Assets/Ellipse.png')} />
           <Image
             style={{zIndex: -1, marginTop: -200}}
@@ -147,575 +201,238 @@ const Home = ({navigation}) => {
           <View style={{zIndex: 5, marginTop: -226}}>
             <TouchableOpacity onPress={Party}>
               <Image source={require('../Assets/homeparty.png')} />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Oxygen',
-                  fontWeight: 'bold',
-                  color: '#111820',
-                  marginTop: -6,
-                  marginLeft: 3,
-                }}>
-                Home Party
-              </Text>
+              <Text style={styles.circletext}>Home Party</Text>
             </TouchableOpacity>
           </View>
-          <View style={{zIndex: 6, marginTop: -30, marginLeft: 225}}>
+          <View style={{zIndex: 5, marginTop: -30, marginLeft: 225}}>
             <TouchableOpacity onPress={Kitty}>
               <Image
-                style={{zIndex: 5}}
-                source={require('../Assets/kittychat.png')}
+                style={{zIndex: 6}}
+                source={require('../../src/Assets/kittychatss.png')}
               />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Oxygen',
-                  fontWeight: 'bold',
-                  color: '#111820',
-                  marginTop: -6,
-                  marginLeft: 3,
-                }}>
-                Kitty Chats
-              </Text>
+              <Text style={styles.circletext}>Kitty Chats</Text>
             </TouchableOpacity>
           </View>
 
           <View style={{zIndex: 5, marginTop: -75, marginRight: 210}}>
             <TouchableOpacity onPress={Friends}>
               <Image source={require('../Assets/friendsquad.png')} />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Oxygen',
-                  fontWeight: 'bold',
-                  color: '#111820',
-                  marginTop: -6,
-                }}>
-                Friends Squad
-              </Text>
+              <Text style={styles.circletext}>Friends Squad</Text>
             </TouchableOpacity>
           </View>
-          <View style={{zIndex: 6, marginTop: 40, marginLeft: 260}}>
+          <View style={{zIndex: 5, marginTop: 40, marginLeft: 260}}>
             <TouchableOpacity onPress={Food}>
               <Image source={require('../Assets/foodclub.png')} />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Oxygen',
-                  fontWeight: 'bold',
-                  color: '#111820',
-                  marginTop: -6,
-                  marginLeft: 3,
-                }}>
-                Food Club
-              </Text>
+              <Text style={styles.circletext}>Food Club</Text>
             </TouchableOpacity>
           </View>
           <View style={{zIndex: 5, marginTop: -80, marginRight: 255}}>
             <TouchableOpacity onPress={PineApple}>
               <Image source={require('../Assets/pineapple.png')} />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Oxygen',
-                  fontWeight: 'bold',
-                  color: '#111820',
-                  marginTop: -6,
-                  marginRight: 4,
-                }}>
-                Pineapple Party
-              </Text>
+              <Text style={styles.circletext}>Pineapple Party</Text>
             </TouchableOpacity>
           </View>
           <View style={{zIndex: 5, marginTop: 30, marginRight: 120}}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={Rave}>
               <Image source={require('../Assets/raveroom.png')} />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Oxygen',
-                  fontWeight: 'bold',
-                  color: '#111820',
-                  marginTop: -6,
-                }}>
-                Rave Room
-              </Text>
+              <Text style={styles.circletext}>Rave Room</Text>
             </TouchableOpacity>
           </View>
           <View style={{zIndex: 5, marginTop: -75, marginLeft: 140}}>
             <TouchableOpacity onPress={Birthday}>
               <Image source={require('../Assets/birthday.png')} />
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Oxygen',
-                  fontWeight: 'bold',
-                  color: '#111820',
-                  marginTop: -6,
-                }}>
-                Birthday Party
-              </Text>
+              <Text style={styles.circletext}>Birthday Party</Text>
             </TouchableOpacity>
           </View>
         </View>
         {showPartyView && (
-          <Animated.View
-            style={{
-              alignItems: 'center',
-              width: '100%',
-              height: 375,
-              borderTopLeftRadius: 50,
-              borderTopRightRadius: 50,
-              backgroundColor: '#ffffff',
-              marginTop: -190,
-              zIndex: 99,
-              justifyContent: 'flex-end',
-              transform: [
-                {
-                  translateY: slideAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [375, 0],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ],
-            }}>
-            <Image
-              source={require('../Assets/partypic.png')}
-              style={{resizeMode: 'stretch', width: '100%'}}
-            />
-            <Text
-              style={{
-                marginTop: 34,
-                fontSize: 22,
-                fontWeight: 'bold',
-                fontFamily: 'Roboto',
-                color: '#111820',
-              }}>
-              House Party
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                color: '#111820',
-                marginTop: 10,
-              }}>
-              136 members joined the room
-            </Text>
-
-            <TouchableOpacity
-              
-              onPress={() => {
-                navigation.navigate('Chats');
-                setShowPartyView(false);
-              }}
-              style={{
-                width: 275,
-                height: 48,
-                borderRadius: 24,
-                marginTop: 37,
-                backgroundColor: '#F6CD5B',
-                elevation: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Roboto',
-                  fontWeight: 'bold',
-                  fontSize: 15,
-                  color: '#363333',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                START TALK
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <MyModal
+            visible={showPartyView}
+            onCloseModal={() => setShowPartyView(false)}
+            navigation={navigation}
+            imageSource={require('../Assets/partypic.png')}
+            image={require('../Assets/homeparty.png')}
+            title="House Party"
+            
+            popuptext="136 members joined the room"
+          />
         )}
 
         {showKittyView && (
-          <Animated.View
-            style={{
-              alignItems: 'center',
-              width: '100%',
-              height: 375,
-              borderTopLeftRadius: 50,
-              borderTopRightRadius: 50,
-              backgroundColor: '#ffffff',
-              marginTop: -190,
-              zIndex: 99,
-              justifyContent: 'flex-end',
-              transform: [
-                {
-                  translateY: slideAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [375, 0],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ],
-            }}>
-            <Image
-              source={require('../Assets/kittychats.png')}
-              style={{resizeMode: 'stretch', width: '100%'}}
-            />
-            <Text
-              style={{
-                marginTop: 34,
-                fontSize: 22,
-                fontWeight: 'bold',
-                fontFamily: 'Roboto',
-                color: '#111820',
-              }}>
-              Kitty Chats
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                color: '#111820',
-                marginTop: 10,
-              }}>
-              136 members joined the room
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Chats');
-                setShowKittyView(false);
-              }}
-              style={{
-                width: 275,
-                height: 48,
-                borderRadius: 24,
-                marginTop: 37,
-                backgroundColor: '#F6CD5B',
-                elevation: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Roboto',
-                  fontWeight: 'bold',
-                  fontSize: 15,
-                  color: '#363333',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                START TALK
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <MyModal
+            visible={showKittyView}
+            onCloseModal={() => setShowKittyView(false)}
+            navigation={navigation}
+            imageSource={require('../Assets/kittychats.png')}
+            image={require('../Assets/kittychatss.png')}
+            title="Kitty Chats"
+            popuptext="136 members joined the room"
+          />
         )}
         {showFriendView && (
-          <Animated.View
-            style={{
-              alignItems: 'center',
-              width: '100%',
-              height: 375,
-              borderTopLeftRadius: 50,
-              borderTopRightRadius: 50,
-              backgroundColor: '#ffffff',
-              marginTop: -190,
-              zIndex: 99,
-              justifyContent: 'flex-end',
-              transform: [
-                {
-                  translateY: slideAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [375, 0],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ],
-            }}>
-            <Image
-              source={require('../Assets/squads.png')}
-              style={{resizeMode: 'stretch', width: '100%'}}
-            />
-            <Text
-              style={{
-                marginTop: 34,
-                fontSize: 22,
-                fontWeight: 'bold',
-                fontFamily: 'Roboto',
-                color: '#111820',
-              }}>
-              Friends Squad
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                color: '#111820',
-                marginTop: 10,
-              }}>
-              136 members joined the room
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Chats');
-                setShowFriendView(false);
-              }}
-              style={{
-                width: 275,
-                height: 48,
-                borderRadius: 24,
-                marginTop: 37,
-                backgroundColor: '#F6CD5B',
-                elevation: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Roboto',
-                  fontWeight: 'bold',
-                  fontSize: 15,
-                  color: '#363333',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                START TALK
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <MyModal
+            visible={showFriendView}
+            onCloseModal={() => setShowFriendView(false)}
+            navigation={navigation}
+            imageSource={require('../Assets/squads.png')}
+            image={require('../Assets/friendsquad.png')}
+            title="Friends Squad"
+            popuptext="136 members joined the room"
+          />
         )}
 
         {showPineAppleView && (
-          <Animated.View
-            style={{
-              alignItems: 'center',
-              width: '100%',
-              height: 375,
-              borderTopLeftRadius: 50,
-              borderTopRightRadius: 50,
-              backgroundColor: '#ffffff',
-              marginTop: -190,
-              zIndex: 99,
-              justifyContent: 'flex-end',
-              transform: [
-                {
-                  translateY: slideAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [375, 0],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ],
-            }}>
-            <Image
-              source={require('../Assets/party.png')}
-              style={{resizeMode: 'stretch', width: '100%'}}
-            />
-            <Text
-              style={{
-                marginTop: 34,
-                fontSize: 22,
-                fontWeight: 'bold',
-                fontFamily: 'Roboto',
-                color: '#111820',
-              }}>
-              PineApple Party
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                color: '#111820',
-                marginTop: 10,
-              }}>
-              136 members joined the room
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Chats');
-                setShowPineAppleView(false);
-              }}
-              style={{
-                width: 275,
-                height: 48,
-                borderRadius: 24,
-                marginTop: 37,
-                backgroundColor: '#F6CD5B',
-                elevation: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Roboto',
-                  fontWeight: 'bold',
-                  fontSize: 15,
-                  color: '#363333',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                START TALK
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <MyModal
+            visible={showPineAppleView}
+            onCloseModal={() => setShowPineAppleView(false)}
+            navigation={navigation}
+            imageSource={require('../Assets/party.png')}
+            image={require('../Assets/pineapple.png')}
+            title="Pineapple Party"
+            popuptext="136 members joined the room"
+          />
         )}
 
         {showBirthdayView && (
-          <Animated.View
-            style={{
-              alignItems: 'center',
-              width: '100%',
-              height: 375,
-              borderTopLeftRadius: 50,
-              borderTopRightRadius: 50,
-              backgroundColor: '#ffffff',
-              marginTop: -190,
-              zIndex: 99,
-              justifyContent: 'flex-end',
-              transform: [
-                {
-                  translateY: slideAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [375, 0],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ],
-            }}>
-            <Image
-              source={require('../Assets/birthdayp.png')}
-              style={{resizeMode: 'stretch', width: '100%'}}
-            />
-            <Text
-              style={{
-                marginTop: 34,
-                fontSize: 22,
-                fontWeight: 'bold',
-                fontFamily: 'Roboto',
-                color: '#111820',
-              }}>
-              Birthday Party
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                color: '#111820',
-                marginTop: 10,
-              }}>
-              136 members joined the room
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Chats');
-                setShowBirthdayView(false);
-              }}
-              style={{
-                width: 275,
-                height: 48,
-                borderRadius: 24,
-                marginTop: 37,
-                backgroundColor: '#F6CD5B',
-                elevation: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Roboto',
-                  fontWeight: 'bold',
-                  fontSize: 15,
-                  color: '#363333',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                START TALK
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <MyModal
+            visible={showBirthdayView}
+            onCloseModal={() => setShowBirthdayView(false)}
+            navigation={navigation}
+            imageSource={require('../Assets/birthdayp.png')}
+            image={require('../Assets/birthday.png')}
+            title="Birthday Party"
+            popuptext="136 members joined the room"
+          />
         )}
 
         {showFoodView && (
-          <Animated.View
-            style={{
-              alignItems: 'center',
-              width: '100%',
-              height: 375,
-              borderTopLeftRadius: 50,
-              borderTopRightRadius: 50,
-              backgroundColor: '#ffffff',
-              marginTop: -190,
-              zIndex: 99,
-              justifyContent: 'flex-end',
-              transform: [
-                {
-                  translateY: slideAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [375, 0],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ],
-            }}>
-            <Image
-              source={require('../Assets/food.png')}
-              style={{resizeMode: 'stretch', width: '100%'}}
-            />
-            <Text
-              style={{
-                marginTop: 34,
-                fontSize: 22,
-                fontWeight: 'bold',
-                fontFamily: 'Roboto',
-                color: '#111820',
-              }}>
-              Food Club
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                color: '#111820',
-                marginTop: 10,
-              }}>
-              136 members joined the room
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Chats');
-                setShowFoodView(false);
-              }}
-              style={{
-                width: 275,
-                height: 48,
-                borderRadius: 24,
-                marginTop: 37,
-                backgroundColor: '#F6CD5B',
-                elevation: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Text
-                style={{
-                  fontFamily: 'Roboto',
-                  fontWeight: 'bold',
-                  fontSize: 15,
-                  color: '#363333',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                START TALK
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <MyModal
+            visible={showFoodView}
+            onCloseModal={() => setShowFoodView(false)}
+            navigation={navigation}
+            imageSource={require('../Assets/food.png')}
+            image={require('../Assets/foodclub.png')}
+            title="Food Club"
+            popuptext="136 members joined the room"
+          />
         )}
-      </SafeAreaView>
+         {showRaveView && (
+          <MyModal
+            visible={showRaveView}
+            onCloseModal={() => setShowRaveView(false)}
+            navigation={navigation}
+            imageSource={require('../Assets/rave.png')}
+            image={require('../Assets/raveroom.png')}
+            title="Rave Room"
+            popuptext="136 members joined the room"
+          />
+        )}
+      </View>
     </>
   );
 };
 
 export default Home;
+const styles = StyleSheet.create({
+  container: {flex: 1, backgroundColor: '#FFFFFF'},
+  header: {
+    flex: 1,
+    backgroundColor: '#F6CD5B',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ACAA7E59',
+    justifyContent: 'center',
+    elevation: 2,
+  },
+  modalBackground: {
+    flex: 1,
+    elevation:9,
+    justifyContent: 'flex-end', // Align the modal at the bottom
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end', // Center the popup vertically
+    alignItems: 'center', // Center the popup horizontally
+  },
+  popup: {
+    width: '100%', // Make the popup span the full width of the screen
+    height: '50%', // Set the popup height to 50% of the screen height
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textbody: {
+    marginTop: 5,
+    flex: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  body: {
+    flex: 7,
+    alignItems: 'center',
+    marginTop: 15,
+  },
+
+  popupbody: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  popupheader: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: 'Roboto',
+    color: '#111820',
+  },
+  boldtext: {
+    color: '#111820',
+    fontWeight: 'bold',
+    fontFamily: 'Oxygen',
+    fontSize: 24,
+  },
+  text: {
+    marginTop: 12,
+    color: '#111820',
+    fontWeight: 'bold',
+    fontFamily: 'Oxygen',
+    fontSize: 18,
+  },
+  image: {
+    resizeMode: 'stretch',
+    width: '100%',
+    flex: 2,
+  },
+  popuptext: {
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    color: '#111820',
+    marginTop: 5,
+  },
+  button: {
+    borderRadius: 24,
+    backgroundColor: '#F6CD5B',
+    elevation: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 0.5,
+  },
+  buttonarea: {
+    flex: 1,
+    width: '70%',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    color: '#363333',
+  },
+  circletext: {
+    fontSize: 12,
+    fontFamily: 'Oxygen',
+    fontWeight: 'bold',
+    color: '#111820',
+    marginTop: -6,
+    marginLeft: 3,
+  },
+});

@@ -1,356 +1,183 @@
-import {View, Text, TouchableOpacity, Image, StatusBar, TextInput,Keyboard,} from 'react-native';
-import React, {useEffect,useState} from 'react';
+import React, {useEffect, useCallback, useState} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StatusBar,
+  StyleSheet,
+} from 'react-native';
+import {useRoute} from '@react-navigation/native';
+import {GiftedChat, Bubble, InputToolbar, Send} from 'react-native-gifted-chat';
 
 const Chats = ({navigation}) => {
-  const [isSingleLine, setIsSingleLine] = useState(true);
-
-  const handleTextLayout = event => {
-    const {lines} = event.nativeEvent;
-    setIsSingleLine(lines.length === 1);
-  };
-
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const route = useRoute();
+  const {image, title} = route.params;
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      () => setIsKeyboardOpen(true)
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setIsKeyboardOpen(false)
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
+    setMessages([
+      {
+        _id: 1,
+        text: 'Hello developer hfeiuhfsjlfdhgjfsdjkfjsdkfhdsklfnjdsjfjdshfjkdshfkldsbfdsj',
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+        },
+      },
+    ]);
   }, []);
 
+  const onSend = useCallback((newMessages = []) => {
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages, newMessages),
+    );
+  }, []);
+
+  const renderCustomSend = props => {
+    return (
+      <Send {...props}>
+        <View style={{height: '100%',width:50,backgroundColor: '#F6CD5B', alignItems:'center', justifyContent: 'center' ,borderRadius: 50,}}>
+        <Image
+          source={require('../Assets/send.png')}
+          style={{borderRadius: 50,height: '60%', width: '60%'}}
+        />
+        </View>
+      </Send>
+    );
+  };
+  const renderBubble = (props, user) => {
+    const { currentMessage } = props;
+    const isCurrentUser = currentMessage.user._id === user._id;
+  
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        {!isCurrentUser && currentMessage.user.avatar && ( // Check if the user avatar exists
+          <View style={{ marginRight: 8 }}>
+            <Image
+              source={{ uri: currentMessage.user.avatar }}
+              style={styles.avatar}
+            />
+          </View>
+        )}
+  
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            backgroundColor: isCurrentUser ? '#FFE7A3' : '#FFFFFF',
+            borderRadius: 15,
+            marginLeft: 0,
+            marginRight: 0,
+            padding: 10,
+          }}
+        >
+          {currentMessage.image && (
+            <Image
+              source={{ uri: currentMessage.image }}
+              style={styles.imageInBubble}
+            />
+          )}
+          {currentMessage.text && (
+            <Text
+              style={{
+                color: '#111820',
+                flexWrap: 'wrap',
+              }}
+            >
+              {currentMessage.text}
+            </Text>
+          )}
+        </View>
+  
+        {isCurrentUser && (
+          <View style={{ marginLeft: 8 }}>
+            <Image source={user.avatar} style={styles.avatar} />
+          </View>
+        )}
+      </View>
+    );
+  };
+  
+  const user = {
+    _id: 1,
+    avatar: require('../Assets/homeparty.png'),
+  };
   return (
     <>
       <StatusBar backgroundColor="#F6CD5B" barStyle="dark-content" />
-      <View style={{width: '100%', height: '100%'}}>
-        <View
-          style={{
-            backgroundColor: '#F6CD5B',
-            flexDirection: 'row',
-            height: 68,
-            borderBottomWidth: 1,
-            borderBottomColor: '#F6CD5B',
-            alignItems: 'center',
-          }}>
+      <View style={{flex: 1}}>
+        <View style={styles.header}>
           <TouchableOpacity
-            style={{marginLeft: 30}}
+            style={{marginLeft: '8%'}}
             onPress={() => {
               navigation.navigate('Home');
             }}>
             <Image source={require('../Assets/back.png')} />
           </TouchableOpacity>
-          <Image
-            source={require('../Assets/homeparty.png')}
-            style={{marginLeft: 15}}
-          />
-          <View style={{flexDirection: 'column', marginLeft: 5}}>
-            <Text
-              style={{
-                color: '#111820',
-                fontFamily: 'Oxygen',
-                fontWeight: 'bold',
-                fontSize: 16,
-              }}>
-              House Party
-            </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                fontFamily: 'Roboto',
-                color: '#111820',
-                marginTop: 2,
-              }}>
-              136 members
-            </Text>
+          <Image source={image} style={{marginLeft: '5%'}} />
+          <View style={styles.headertitle}>
+            <Text style={styles.boldtext}>{title}</Text>
+            <Text style={styles.text}>136 members</Text>
           </View>
         </View>
-
-        <View style={{flexDirection: 'row', marginRight: 75.5, marginTop: 20}}>
-          <View
-            style={{
-              position: 'relative',
-              backgroundColor: '#FFFFFF',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 24,
-              marginLeft: 18,
-              paddingHorizontal: 10,
-              height: isSingleLine ? 48 : 'auto',
-            }}>
-            <Image
-              source={require('../Assets/homeparty.png')}
-              style={{position: 'absolute', top: -5, left: -5}}
+        <GiftedChat
+          messages={messages}
+          onSend={onSend}
+          user={{
+            _id: 1, // Replace 1 with the current user's _id
+            name: 'Your Name', // Replace with the current user's name
+            avatar: require('../Assets/homeparty.png'), // Replace with the actual avatar image source
+          }}
+          renderBubble={props => renderBubble(props, user)}
+          renderInputToolbar={props => (
+            <InputToolbar
+              {...props}
+              containerStyle={{backgroundColor: '#363333',}}
             />
-            <Text
-              style={{
-                marginTop: 16,
-                alignSelf: 'center',
-                textAlign: 'auto',
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: '#111820',
-                marginBottom: 16,
-                marginLeft: 55,
-              }}
-              onTextLayout={handleTextLayout}>
-              Lorem ipsum dolor sit amet.
-            </Text>
-          </View>
-        </View>
-        <View style={{flexDirection: 'row', marginRight: 75.5, marginTop: 26}}>
-          <View
-            style={{
-              position: 'relative',
-              backgroundColor: '#FFFFFF',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 24,
-              marginLeft: 18,
-              paddingHorizontal: 10,
-              height: isSingleLine ? 48 : 'auto',
-            }}>
-            <Image
-              source={require('../Assets/homeparty.png')}
-              style={{position: 'absolute', top: -5, left: -5}}
-            />
-            <Text
-              style={{
-                marginTop: 16,
-                alignSelf: 'center',
-                textAlign: 'auto',
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: '#111820',
-                marginBottom: 16,
-                marginLeft: 55,
-              }}
-              onTextLayout={handleTextLayout}>
-              Lorem ipsum.
-            </Text>
-          </View>
-        </View>
-        <View style={{flexDirection: 'row', marginRight: 75.5, marginTop: 26}}>
-          <View
-            style={{
-              position: 'relative',
-              backgroundColor: '#FFFFFF',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 24,
-              marginLeft: 18,
-              paddingHorizontal: 10,
-              height: isSingleLine ? 48 : 'auto',
-            }}>
-            <Image
-              source={require('../Assets/homeparty.png')}
-              style={{position: 'absolute', top: -5, left: -5}}
-            />
-            <Text
-              style={{
-                marginTop: 16,
-                alignSelf: 'center',
-                textAlign: 'auto',
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: '#111820',
-                marginBottom: 16,
-                marginLeft: 55,
-              }}
-              onTextLayout={handleTextLayout}>
-              Lorem ipsum .
-            </Text>
-          </View>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-            marginRight: 14,
-            marginTop: 26,
-          }}>
-          <View
-            style={{
-              position: 'relative',
-              backgroundColor: '#FFE7A3',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 24,
-              marginLeft: 18,
-              paddingHorizontal: 10,
-              height: isSingleLine ? 48 : 'auto',
-            }}>
-            <Image
-              source={require('../Assets/homeparty.png')}
-              style={{position: 'absolute', top: -5, right: -8}}
-            />
-            <Text
-              style={{
-                marginTop: 16,
-                alignSelf: 'center',
-                textAlign: 'auto',
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: '#111820',
-                marginBottom: 16,
-                marginRight: 55,
-              }}
-              onTextLayout={handleTextLayout}>
-              Lorem ipsum...
-            </Text>
-          </View>
-        </View>
-        <View style={{flexDirection: 'row', marginRight: 75.5, marginTop: 26}}>
-          <View
-            style={{
-              position: 'relative',
-              backgroundColor: '#FFFFFF',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 24,
-              marginLeft: 18,
-              paddingHorizontal: 10,
-              height: isSingleLine ? 48 : 'auto',
-            }}>
-            <Image
-              source={require('../Assets/homeparty.png')}
-              style={{position: 'absolute', top: -5, left: -5}}
-            />
-            <Text
-              style={{
-                marginTop: 16,
-                alignSelf: 'center',
-                textAlign: 'auto',
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: '#111820',
-                marginBottom: 16,
-                marginLeft: 55,
-              }}
-              onTextLayout={handleTextLayout}>
-              Lorem ipsum dolor sit amet....
-            </Text>
-          </View>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-            marginRight: 14,
-            marginTop: 26,
-          }}>
-          <View
-            style={{
-              position: 'relative',
-              backgroundColor: '#FFE7A3',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 24,
-              marginLeft: 18,
-              paddingHorizontal: 10,
-              height: isSingleLine ? 48 : 'auto',
-            }}>
-            <Image
-              source={require('../Assets/homeparty.png')}
-              style={{position: 'absolute', top: -5, right: -8}}
-            />
-            <Text
-              style={{
-                marginTop: 16,
-                alignSelf: 'center',
-                textAlign: 'auto',
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: '#111820',
-                marginBottom: 16,
-                marginRight: 55,
-              }}
-              onTextLayout={handleTextLayout}>
-              Lorem ipsum...
-            </Text>
-          </View>
-        </View>
-        <View style={{flexDirection: 'row', marginRight: 75.5, marginTop: 26}}>
-          <View
-            style={{
-              position: 'relative',
-              backgroundColor: '#FFFFFF',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 24,
-              marginLeft: 18,
-              paddingHorizontal: 10,
-              height: isSingleLine ? 48 : 'auto',
-            }}>
-            <Image
-              source={require('../Assets/homeparty.png')}
-              style={{position: 'absolute', top: -5, left: -5}}
-            />
-            <Text
-              style={{
-                marginTop: 16,
-                alignSelf: 'center',
-                textAlign: 'auto',
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: '#111820',
-                marginBottom: 16,
-                marginLeft: 55,
-              }}
-              onTextLayout={handleTextLayout}>
-              Lorem ipsum dolor sit amet. Ut rerum odit a beatae fugiat id acc
-              antium provident. Aut aperiam iu re et modi consequatur 33 invent
-              ore voluptas.
-            </Text>
-          </View>
-        </View>
-        <View style={{position: 'absolute', bottom: 0,marginBottom: isKeyboardOpen ? 0 : 25, alignSelf: 'center'}}>
-          <TouchableOpacity
-            style={{
-              width: 335,
-              justifyContent: 'center',
-              borderRadius: 28,
-              backgroundColor: '#363333',
-              height: 50,
-            }}>
-            <View
-              style={{justifyContent: 'space-between', flexDirection: 'row'}}>
-              
-              <TextInput
-                       
-                        style={{color: '#FFFFFF', marginLeft: 23, opacity: 0.5}}
-                        placeholder="Type your message here..."
-                        placeholderTextColor={"#FFFFFF"}
-                        autoCapitalize="none"
-                        
-                      />
-                <View style={{width:50, height: 50,borderRadius: 100,alignItems:'center',justifyContent:'center', backgroundColor: '#F6CD5B'}}>
-                <Image
-                  source={require('../Assets/send.png')}
-                 
-                />
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
+          )}
+          renderSend={renderCustomSend}
+          alwaysShowSend
+        />
       </View>
     </>
   );
 };
 
 export default Chats;
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: '#F6CD5B',
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F6CD5B',
+    alignItems: 'center',
+  },
+  headertitle: {flexDirection: 'column', marginLeft: 5},
+  boldtext: {
+    color: '#111820',
+    fontFamily: 'Oxygen',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  text: {
+    fontSize: 12,
+    fontFamily: 'Roboto',
+    color: '#111820',
+    marginTop: 2,
+  },
+  imageInBubble: {
+    backgroundColor: '#FFE7A3',
+    width: 200,
+    height: 100,
+    borderRadius: 10,
+    
+  },
+  avatar: {
+   
+    top: 0,
+    right: 0,
+    borderRadius: 20,
+  },
+});
