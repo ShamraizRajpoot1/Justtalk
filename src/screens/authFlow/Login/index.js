@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import React, {useRef, useState, useEffect} from 'react';
 
-const SignUp = ({navigation}) => {
+const Login = ({navigation}) => {
   const passwordInputRef = useRef(null);
   const [isChecked, setIsChecked] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
 
   const [showView, setShowView] = useState(false);
   const [show2View, set2ShowView] = useState(false);
@@ -49,7 +49,6 @@ const SignUp = ({navigation}) => {
     alignItems: 'center',
     justifyContent: 'center',
   };
- 
 
   return (
     <>
@@ -60,7 +59,7 @@ const SignUp = ({navigation}) => {
           keyboardShouldPersistTaps="handled">
           <View style={styles.top}>
             <View style={styles.image}>
-              <Image source={require('../Assets/login.png')} />
+              <Image source={require('../../../Assets/icons/login.png')} />
             </View>
             <View style={{flex: 2, justifyContent: 'flex-end'}}>
               <Text style={styles.text}>Welcome to Login!</Text>
@@ -71,10 +70,10 @@ const SignUp = ({navigation}) => {
           <View style={{flex: 2}}>
             <View style={styles.mid}>
               <View style={styles.email}>
-                <Text style={styles.fieldtitle}>Username</Text>
+                <Text style={styles.fieldtitle}>Email:</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="johndoe"
+                  placeholder="johndoe@email.com"
                   placeholderTextColor="#222222"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -102,52 +101,33 @@ const SignUp = ({navigation}) => {
                   <TouchableOpacity
                     onPress={toggleShowPassword}
                     style={{marginRight: 15}}>
-                    <Image source={require('../Assets/eye.png')} />
+                    <Image source={require('../../../Assets/icons/eye.png')} />
                   </TouchableOpacity>
                 </View>
               </View>
-              <View
-                onTouchStart={() => passwordInputRef.current.focus()}
-                style={styles.password}>
-                <Text style={styles.fieldtitle}>Comfirm Password</Text>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                  }}>
-                  <TextInput
-                    ref={passwordInputRef}
-                    style={styles.input}
-                    placeholder="Enter your password"
-                    placeholderTextColor="#222222"
-                    secureTextEntry={showPassword}
-                    autoCapitalize="none"
-                    autoCompleteType="password"
-                  />
-                  <TouchableOpacity
-                    onPress={toggleShowPassword}
-                    style={{marginRight: 15}}>
-                    <Image source={require('../Assets/eye.png')} />
-                  </TouchableOpacity>
-                </View>
-              </View>
+
               <View style={styles.remrow}>
                 <View style={styles.toggleview}>
                   <TouchableOpacity onPress={toggleCheckbox}>
                     <View style={toggle}>
                       {isChecked && (
                         <Image
-                          source={require('../Assets/tick.png')}
+                          source={require('../../../Assets/icons/tick.png')}
                           style={styles.toggleimg}
                         />
                       )}
                     </View>
                   </TouchableOpacity>
 
-                  <Text style={styles.toggletext}>Accept </Text>
-                  <Text style={styles.forget}> T&C,</Text>
-                  <Text style={styles.forget}> Privacy Policy</Text>
+                  <Text style={styles.toggletext}>Remember me</Text>
                 </View>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('Forget');
+                  }}>
+                  <Text style={styles.forget}>Forgot Password?</Text>
+                </TouchableOpacity>
               </View>
 
               <View style={styles.button}>
@@ -155,18 +135,18 @@ const SignUp = ({navigation}) => {
                   onPress={() => {
                     navigation.navigate('Home');
                   }}>
-                  <Text style={styles.Logintext}>SIGNUP</Text>
+                  <Text style={styles.Logintext}>LOG IN</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={styles.end}>
-              <Text style={styles.endtext}>Already have an account?</Text>
+              <Text style={styles.endtext}>Don't have an account?</Text>
               <TouchableOpacity
                 style={styles.bottombtn}
                 onPress={() => {
-                  navigation.navigate('Login');
+                  navigation.navigate('SignUp');
                 }}>
-                <Text style={styles.btntext}>LOGIN</Text>
+                <Text style={styles.btntext}>CREATE AN ACCOUNT</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -176,7 +156,7 @@ const SignUp = ({navigation}) => {
   );
 };
 
-export default SignUp;
+export default Login;
 
 const styles = StyleSheet.create({
   container: {
@@ -258,7 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
     color: '#111820',
-    
+    marginRight: 20,
   },
   fieldtitle: {
     marginLeft: 15,
@@ -270,6 +250,7 @@ const styles = StyleSheet.create({
   },
   end: {flex: 1, alignItems: 'center', justifyContent: 'flex-end', bottom: 10},
   endtext: {
+    marginTop: '5%',
     color: '#222222',
     fontFamily: 'Roboto',
     fontSize: 15,
@@ -291,7 +272,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '75%',
-    height: '12%',
+    height: '15%',
     backgroundColor: '#363333',
     borderRadius: 24,
     alignItems: 'center',

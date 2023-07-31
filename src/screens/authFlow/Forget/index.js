@@ -101,7 +101,7 @@ const Forget = ({navigation}) => {
             navigation.navigate('Login');
           }}>
           <Image
-            source={require('../Assets/back.png')}
+            source={require('../../../Assets/icons/back.png')}
             style={{marginTop: 30}}
           />
         </TouchableOpacity>
@@ -135,8 +135,8 @@ const Forget = ({navigation}) => {
           visible={showLastView}
           onCloseModal={() => setShowLastView(false)}
           navigation={navigation}
-          imageSource={require('../Assets/checkc2.png')}
-          image={require('../Assets/raveroom.png')}
+          imageSource={require('../../../Assets/icons/checkc2.png')}
+          image={require('../../../Assets/icons/raveroom.png')}
           title="Password reset link sent "
           title2 = "to your email"
           

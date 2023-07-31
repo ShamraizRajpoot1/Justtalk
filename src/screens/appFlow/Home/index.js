@@ -184,7 +184,7 @@ const Home = ({navigation}) => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Image
-            source={require('../Assets/homelogo.png')}
+            source={require('../../../Assets/icons/homelogo.png')}
             style={{marginLeft: 21}}
           />
         </View>
@@ -193,14 +193,14 @@ const Home = ({navigation}) => {
           <Text style={styles.text}>Join Any Room Now</Text>
         </View>
         <View style={styles.body}>
-          <Image source={require('../Assets/Ellipse.png')} />
+          <Image source={require('../../../Assets/icons/Ellipse.png')} />
           <Image
             style={{zIndex: -1, marginTop: -200}}
-            source={require('../Assets/homeslogo.png')}
+            source={require('../../../Assets/icons/homeslogo.png')}
           />
           <View style={{zIndex: 5, marginTop: -226}}>
             <TouchableOpacity onPress={Party}>
-              <Image source={require('../Assets/homeparty.png')} />
+              <Image source={require('../../../Assets/icons/homeparty.png')} />
               <Text style={styles.circletext}>Home Party</Text>
             </TouchableOpacity>
           </View>
@@ -208,7 +208,7 @@ const Home = ({navigation}) => {
             <TouchableOpacity onPress={Kitty}>
               <Image
                 style={{zIndex: 6}}
-                source={require('../../src/Assets/kittychatss.png')}
+                source={require('../../../Assets/icons/kittychatss.png')}
               />
               <Text style={styles.circletext}>Kitty Chats</Text>
             </TouchableOpacity>
@@ -216,31 +216,31 @@ const Home = ({navigation}) => {
 
           <View style={{zIndex: 5, marginTop: -75, marginRight: 210}}>
             <TouchableOpacity onPress={Friends}>
-              <Image source={require('../Assets/friendsquad.png')} />
+              <Image source={require('../../../Assets/icons/friendsquad.png')} />
               <Text style={styles.circletext}>Friends Squad</Text>
             </TouchableOpacity>
           </View>
           <View style={{zIndex: 5, marginTop: 40, marginLeft: 260}}>
             <TouchableOpacity onPress={Food}>
-              <Image source={require('../Assets/foodclub.png')} />
+              <Image source={require('../../../Assets/icons/foodclub.png')} />
               <Text style={styles.circletext}>Food Club</Text>
             </TouchableOpacity>
           </View>
           <View style={{zIndex: 5, marginTop: -80, marginRight: 255}}>
             <TouchableOpacity onPress={PineApple}>
-              <Image source={require('../Assets/pineapple.png')} />
+              <Image source={require('../../../Assets/icons/pineapple.png')} />
               <Text style={styles.circletext}>Pineapple Party</Text>
             </TouchableOpacity>
           </View>
           <View style={{zIndex: 5, marginTop: 30, marginRight: 120}}>
             <TouchableOpacity onPress={Rave}>
-              <Image source={require('../Assets/raveroom.png')} />
+              <Image source={require('../../../Assets/icons/raveroom.png')} />
               <Text style={styles.circletext}>Rave Room</Text>
             </TouchableOpacity>
           </View>
           <View style={{zIndex: 5, marginTop: -75, marginLeft: 140}}>
             <TouchableOpacity onPress={Birthday}>
-              <Image source={require('../Assets/birthday.png')} />
+              <Image source={require('../../../Assets/icons/birthday.png')} />
               <Text style={styles.circletext}>Birthday Party</Text>
             </TouchableOpacity>
           </View>
@@ -250,8 +250,8 @@ const Home = ({navigation}) => {
             visible={showPartyView}
             onCloseModal={() => setShowPartyView(false)}
             navigation={navigation}
-            imageSource={require('../Assets/partypic.png')}
-            image={require('../Assets/homeparty.png')}
+            imageSource={require('../../../Assets/icons/partypic.png')}
+            image={require('../../../Assets/icons/homeparty.png')}
             title="House Party"
             
             popuptext="136 members joined the room"
@@ -263,8 +263,8 @@ const Home = ({navigation}) => {
             visible={showKittyView}
             onCloseModal={() => setShowKittyView(false)}
             navigation={navigation}
-            imageSource={require('../Assets/kittychats.png')}
-            image={require('../Assets/kittychatss.png')}
+            imageSource={require('../../../Assets/icons/kittychats.png')}
+            image={require('../../../Assets/icons/kittychatss.png')}
             title="Kitty Chats"
             popuptext="136 members joined the room"
           />
@@ -274,8 +274,8 @@ const Home = ({navigation}) => {
             visible={showFriendView}
             onCloseModal={() => setShowFriendView(false)}
             navigation={navigation}
-            imageSource={require('../Assets/squads.png')}
-            image={require('../Assets/friendsquad.png')}
+            imageSource={require('../../../Assets/icons/squads.png')}
+            image={require('../../../Assets/icons/friendsquad.png')}
             title="Friends Squad"
             popuptext="136 members joined the room"
           />
@@ -286,8 +286,8 @@ const Home = ({navigation}) => {
             visible={showPineAppleView}
             onCloseModal={() => setShowPineAppleView(false)}
             navigation={navigation}
-            imageSource={require('../Assets/party.png')}
-            image={require('../Assets/pineapple.png')}
+            imageSource={require('../../../Assets/icons/party.png')}
+            image={require('../../../Assets/icons/pineapple.png')}
             title="Pineapple Party"
             popuptext="136 members joined the room"
           />
@@ -298,8 +298,8 @@ const Home = ({navigation}) => {
             visible={showBirthdayView}
             onCloseModal={() => setShowBirthdayView(false)}
             navigation={navigation}
-            imageSource={require('../Assets/birthdayp.png')}
-            image={require('../Assets/birthday.png')}
+            imageSource={require('../../../Assets/icons/birthdayp.png')}
+            image={require('../../../Assets/icons/birthday.png')}
             title="Birthday Party"
             popuptext="136 members joined the room"
           />
@@ -310,8 +310,8 @@ const Home = ({navigation}) => {
             visible={showFoodView}
             onCloseModal={() => setShowFoodView(false)}
             navigation={navigation}
-            imageSource={require('../Assets/food.png')}
-            image={require('../Assets/foodclub.png')}
+            imageSource={require('../../../Assets/icons/food.png')}
+            image={require('../../../Assets/icons/foodclub.png')}
             title="Food Club"
             popuptext="136 members joined the room"
           />
@@ -321,8 +321,8 @@ const Home = ({navigation}) => {
             visible={showRaveView}
             onCloseModal={() => setShowRaveView(false)}
             navigation={navigation}
-            imageSource={require('../Assets/rave.png')}
-            image={require('../Assets/raveroom.png')}
+            imageSource={require('../../../Assets/icons/rave.png')}
+            image={require('../../../Assets/icons/raveroom.png')}
             title="Rave Room"
             popuptext="136 members joined the room"
           />

@@ -33,15 +33,15 @@ const Splash = ({navigation}) => {
     }, 500);
   }, []);
 
-
   return (
     <>
-    {showView ? (
-      <StatusBar backgroundColor="#F6CD5B" barStyle="#ffffff" />) : null}
+      {showView ? (
+        <StatusBar backgroundColor="#F6CD5B" barStyle="#ffffff" />
+      ) : null}
       <View style={{height: '100%', width: '100%', backgroundColor: '#F6CD5B'}}>
         <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
           <Image
-            source={require('../Assets/logo.png')}
+            source={require('../../../Assets/icons/logo.png')}
             style={styles.backgroundImage}
           />
         </Animated.View>
