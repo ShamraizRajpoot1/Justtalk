@@ -8,18 +8,32 @@ import {
   TouchableOpacity,
   StatusBar,
   StyleSheet,
+  Alert,
 } from 'react-native';
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
+import {AuthContext} from '../../../Navigation/AuthProvider';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import {
+  responsiveHeight,
+  responsiveWidth,
+  responsiveFontSize,
+} from 'react-native-responsive-dimensions';
 
 const SignUp = ({navigation}) => {
+  const [email, setEmail] = useState();
+  const [name, setName] = useState();
+  const [password, setPassword] = useState();
+  const [confirmPassword, setComfirmPassword] = useState();
   const passwordInputRef = useRef(null);
   const [isChecked, setIsChecked] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(true);
   const [showView, setShowView] = useState(false);
   const [show2View, set2ShowView] = useState(false);
 
   useEffect(() => {
+    console.log('User: ', user);
     const delay = 500;
     const timer = setTimeout(() => {
       setShowView(true);
@@ -40,8 +54,8 @@ const SignUp = ({navigation}) => {
     setShowPassword(prevShowPassword => !prevShowPassword);
   };
   const toggle = {
-    width: 14,
-    height: 14,
+    width: scale(15),
+    height: scale(15),
     borderWidth: 2,
     borderRadius: 100,
     borderColor: isChecked ? '#F6CD5B' : '#222222',
@@ -49,8 +63,47 @@ const SignUp = ({navigation}) => {
     alignItems: 'center',
     justifyContent: 'center',
   };
- 
+  
+  const {register} = useContext(AuthContext);
+  const {user, setUser} = useContext(AuthContext);
+  const onAuthStateChanged = (user) => {
+    setUser(user);
+    // if (initializing) setInitializing(false);
+  };
+  const Sign = async () => {
 
+    if (password !== confirmPassword) {
+      console.log("Passwords don't match");
+      return;
+    }
+
+    try {
+      await register(email, password)?
+      navigation.navigate('Home', { name }) : Alert.alert('Not registerd')
+    } catch (error) {
+      console.log('Error signing up:', error.message);
+    }
+      // .then(auth().onAuthStateChanged(onAuthStateChanged))
+      //   ? firestore()
+      //       .collection('Users')
+      //       .doc('user.uid')
+      //       .set({
+      //         userId: user,
+
+      //         email: email,
+      //         name: name,
+              
+      //       })
+      //       .then(() => {
+              
+      //         console.log('User Registered');
+      //       })
+      //       .catch(error => {
+      //         console.log('Something wents wrong', error);
+      //       })
+      //   : console.log('user not registered');
+    
+  };
   return (
     <>
       <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
@@ -60,7 +113,7 @@ const SignUp = ({navigation}) => {
           keyboardShouldPersistTaps="handled">
           <View style={styles.top}>
             <View style={styles.image}>
-              <Image source={require('../../../Assets/icons/login.png')} />
+              <Image style={styles.img} source={require('../../../Assets/icons/login.png')} />
             </View>
             <View style={{flex: 2, justifyContent: 'flex-end'}}>
               <Text style={styles.text}>Welcome to Login!</Text>
@@ -68,12 +121,25 @@ const SignUp = ({navigation}) => {
           </View>
           <View style={styles.line} />
 
-          <View style={{flex: 2}}>
+          <View style={{flex: 4, justifyContent:'space-between'}}>
             <View style={styles.mid}>
               <View style={styles.email}>
+                <Text style={styles.fieldtitle}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={userEmail => setEmail(userEmail)}
+                  placeholder="johndoe@email.com"
+                  placeholderTextColor="#222222"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCompleteType="email"
+                />
+              </View>
+              <View style={[styles.email, {marginTop: 15}]}>
                 <Text style={styles.fieldtitle}>Username</Text>
                 <TextInput
                   style={styles.input}
+                  onChangeText={userName => setName(userName)}
                   placeholder="johndoe"
                   placeholderTextColor="#222222"
                   keyboardType="email-address"
@@ -93,6 +159,7 @@ const SignUp = ({navigation}) => {
                   <TextInput
                     ref={passwordInputRef}
                     style={styles.input}
+                    onChangeText={userPassword => setPassword(userPassword)}
                     placeholder="Enter your password"
                     placeholderTextColor="#222222"
                     secureTextEntry={showPassword}
@@ -118,6 +185,9 @@ const SignUp = ({navigation}) => {
                   <TextInput
                     ref={passwordInputRef}
                     style={styles.input}
+                    onChangeText={userComfirmPassword =>
+                      setComfirmPassword(userComfirmPassword)
+                    }
                     placeholder="Enter your password"
                     placeholderTextColor="#222222"
                     secureTextEntry={showPassword}
@@ -151,10 +221,7 @@ const SignUp = ({navigation}) => {
               </View>
 
               <View style={styles.button}>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('Home');
-                  }}>
+                <TouchableOpacity onPress={Sign}>
                   <Text style={styles.Logintext}>SIGNUP</Text>
                 </TouchableOpacity>
               </View>
@@ -184,62 +251,73 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   top: {
+    width:'100%',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
   image: {
+    
     flex: 3,
     justifyContent: 'flex-end',
+    alignItems:'center'
+  },
+  img: {
+    height:scale(80),
+    width: scale(185)
   },
   text: {
     color: '#111820',
     fontFamily: 'Oxygen',
-    fontSize: 24,
+    fontSize: responsiveFontSize(3),
     fontWeight: 'bold',
   },
   line: {
-    width: '33%',
+    width: responsiveWidth(33),
     height: 0,
     borderColor: '#F6CD5B',
-    borderBottomWidth: 3,
+    borderBottomWidth: responsiveHeight(0.3),
     marginLeft: '25%',
   },
   mid: {
-    flex: 1,
+    marginTop: responsiveHeight(2),
     alignItems: 'center',
     justifyContent: 'center',
   },
   email: {
-    width: '90%',
+    width: responsiveWidth(90),
+    height:responsiveHeight(10),
     marginHorizontal: 20,
     backgroundColor: '#F7F7F7',
     borderRadius: 12,
   },
   password: {
     marginTop: 20,
-    width: '90%',
+    width: responsiveWidth(90),
+    height:responsiveHeight(10),
     marginHorizontal: 20,
     backgroundColor: '#F7F7F7',
     borderRadius: 12,
   },
   input: {
+    
     borderWidth: 0,
     marginLeft: 13,
     color: '#222222',
     fontFamily: 'Roboto',
-    fontSize: 15,
+    fontSize: responsiveFontSize(1.9),
     fontWeight: 'normal',
   },
   remrow: {
     width: '100%',
-    marginTop: 10,
+    marginTop: responsiveHeight(2),
+    paddingHorizontal :responsiveWidth(3),
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   toggleimg: {
-    width: 6,
-    height: 4,
+    height:scale(7),
+    width: scale(7),
     borderRadius: 100,
     backgroundColor: '#F6CD5B',
   },
@@ -249,61 +327,61 @@ const styles = StyleSheet.create({
   },
   toggletext: {
     fontFamily: 'Roboto',
-    fontSize: 12,
+    fontSize: responsiveFontSize(1.5),
     color: '#000000',
-    marginLeft: 6,
+    marginLeft: responsiveWidth(1.5),
   },
   forget: {
     fontFamily: 'Roboto',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: responsiveFontSize(1.6),
     color: '#111820',
-    
   },
   fieldtitle: {
     marginLeft: 15,
     marginTop: 8,
     color: '#444444',
     fontFamily: 'Roboto',
-    fontSize: 12,
+    fontSize: responsiveFontSize(1.5),
     fontWeight: 'bold',
   },
-  end: {flex: 1, alignItems: 'center', justifyContent: 'flex-end', bottom: 10},
+  end: {alignItems: 'center', marginBottom:'5%'},
   endtext: {
+    
     color: '#222222',
     fontFamily: 'Roboto',
-    fontSize: 15,
+    fontSize: responsiveFontSize(2),
   },
   btntext: {
     fontFamily: 'Roboto',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: responsiveFontSize(2),
     color: '#222222',
   },
   bottombtn: {
-    width: '75%',
-    height: '30%',
+    width: responsiveWidth(75),
+    height: responsiveHeight(8),
     backgroundColor: '#EEEEEE',
-    borderRadius: 24,
+    borderRadius: 50,
     alignItems: 'center',
     marginTop: 10,
     justifyContent: 'center',
   },
   button: {
-    width: '75%',
-    height: '12%',
+    width: responsiveWidth(75),
+    height: responsiveHeight(8),
     backgroundColor: '#363333',
-    borderRadius: 24,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
     borderColor: '#B7B7B780',
-    marginTop: 29,
+    marginTop: 9,
   },
   Logintext: {
     fontFamily: 'Roboto',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: responsiveFontSize(2),
     color: '#FFFFFF',
   },
 });

@@ -31,7 +31,7 @@ const Black = ({navigation}) => {
   return (
     <>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
-      <SafeAreaView
+      <View
         style={{height: '100%', width: '100%', backgroundColor: '#000'}}
       />
     </>

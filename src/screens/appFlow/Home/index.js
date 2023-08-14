@@ -6,10 +6,18 @@ import {
   ScrollView,
   Modal,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import React, {useContext, useEffect, useState} from 'react';
 import {SafeAreaView, TouchableOpacity, Image, StatusBar} from 'react-native';
+import {AuthContext} from '../../../Navigation/AuthProvider';
+import { responsiveFontSize, responsiveWidth } from 'react-native-responsive-dimensions';
+import { scale } from 'react-native-size-matters';
+import { useRoute } from '@react-navigation/native';
 
-const Home = ({navigation}) => {
+const Home = ({ navigation, route }) => {
+  
+  const {user, logout} = useContext(AuthContext);
   const [showFoodView, setShowFoodView] = useState(false);
   const Food = () => {
     setShowFoodView(true);
@@ -104,7 +112,24 @@ const Home = ({navigation}) => {
   const Rave = () => {
     setShowRaveView(true);
   };
-
+  useEffect(() => {
+    if (user && route.params && route.params.name) {
+      firestore()
+        .collection('Users')
+        .doc(user.uid)
+        .set({
+          userId: user.uid,
+          email: user.email,
+          name: route.params.name,
+        })
+        .then(() => {
+          console.log('User Registered');
+        })
+        .catch(error => {
+          console.log('Something went wrong', error);
+        });
+    }
+  }, [user, route.params]);
   useEffect(() => {
     if (showRaveView) {
       Animated.spring(slideAnimation, {
@@ -123,6 +148,7 @@ const Home = ({navigation}) => {
     title,
     popuptext,
     image,
+    groupId
   }) => {
     const [fadeAnim] = useState(new Animated.Value(0));
 
@@ -147,7 +173,6 @@ const Home = ({navigation}) => {
         handleModalOpen();
       }
     }, [visible]);
-
     return (
       <Modal transparent visible={visible} onRequestClose={handleModalClose}>
         <TouchableOpacity
@@ -164,7 +189,7 @@ const Home = ({navigation}) => {
               <View style={styles.buttonarea}>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('Chats', {image: image, title});
+                    navigation.navigate('Chats', {image: image, title, groupId});
                     handleModalClose();
                   }}
                   style={styles.button}>
@@ -177,17 +202,25 @@ const Home = ({navigation}) => {
       </Modal>
     );
   };
+  // const {user} = useContext(AuthContext);
+
   return (
     <>
       <StatusBar backgroundColor="#F6CD5B" barStyle="dark-content" />
 
       <View style={styles.container}>
         <View style={styles.header}>
+        <TouchableOpacity style={{marginLeft: 20,}}
+            onPress ={() => logout()}>
+            <Image style={styles.headerback} source={require('../../../Assets/icons/back.png')} />
+          </TouchableOpacity>
           <Image
             source={require('../../../Assets/icons/homelogo.png')}
-            style={{marginLeft: 21}}
+            style={styles.headerimg}
           />
+          
         </View>
+        <View><Text></Text></View>
         <View style={styles.textbody}>
           <Text style={styles.boldtext}>These Chatrooms, You Bet!</Text>
           <Text style={styles.text}>Join Any Room Now</Text>
@@ -216,7 +249,9 @@ const Home = ({navigation}) => {
 
           <View style={{zIndex: 5, marginTop: -75, marginRight: 210}}>
             <TouchableOpacity onPress={Friends}>
-              <Image source={require('../../../Assets/icons/friendsquad.png')} />
+              <Image
+                source={require('../../../Assets/icons/friendsquad.png')}
+              />
               <Text style={styles.circletext}>Friends Squad</Text>
             </TouchableOpacity>
           </View>
@@ -253,7 +288,7 @@ const Home = ({navigation}) => {
             imageSource={require('../../../Assets/icons/partypic.png')}
             image={require('../../../Assets/icons/homeparty.png')}
             title="House Party"
-            
+            groupId= "55rI7HhE8bKU3pxCJEiI"
             popuptext="136 members joined the room"
           />
         )}
@@ -265,6 +300,7 @@ const Home = ({navigation}) => {
             navigation={navigation}
             imageSource={require('../../../Assets/icons/kittychats.png')}
             image={require('../../../Assets/icons/kittychatss.png')}
+            groupId="8KbDhLgXzEuL2SQRixZw"
             title="Kitty Chats"
             popuptext="136 members joined the room"
           />
@@ -276,6 +312,7 @@ const Home = ({navigation}) => {
             navigation={navigation}
             imageSource={require('../../../Assets/icons/squads.png')}
             image={require('../../../Assets/icons/friendsquad.png')}
+            groupId="BEmESmlJYXgchBx3EFLo"
             title="Friends Squad"
             popuptext="136 members joined the room"
           />
@@ -288,6 +325,7 @@ const Home = ({navigation}) => {
             navigation={navigation}
             imageSource={require('../../../Assets/icons/party.png')}
             image={require('../../../Assets/icons/pineapple.png')}
+            groupId="ImI7Lfu15lk9HrouIlV5"
             title="Pineapple Party"
             popuptext="136 members joined the room"
           />
@@ -300,6 +338,7 @@ const Home = ({navigation}) => {
             navigation={navigation}
             imageSource={require('../../../Assets/icons/birthdayp.png')}
             image={require('../../../Assets/icons/birthday.png')}
+            groupId="X6YJLf5VrEpbtCt8BoVR"
             title="Birthday Party"
             popuptext="136 members joined the room"
           />
@@ -312,11 +351,12 @@ const Home = ({navigation}) => {
             navigation={navigation}
             imageSource={require('../../../Assets/icons/food.png')}
             image={require('../../../Assets/icons/foodclub.png')}
+            groupId="M2vydmymRE6c2N1Ew8vP"
             title="Food Club"
             popuptext="136 members joined the room"
           />
         )}
-         {showRaveView && (
+        {showRaveView && (
           <MyModal
             visible={showRaveView}
             onCloseModal={() => setShowRaveView(false)}
@@ -324,6 +364,7 @@ const Home = ({navigation}) => {
             imageSource={require('../../../Assets/icons/rave.png')}
             image={require('../../../Assets/icons/raveroom.png')}
             title="Rave Room"
+            groupId="PNpaguzCg1uOjdJWxQLC"
             popuptext="136 members joined the room"
           />
         )}
@@ -338,14 +379,23 @@ const styles = StyleSheet.create({
   header: {
     flex: 1,
     backgroundColor: '#F6CD5B',
+    flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#ACAA7E59',
-    justifyContent: 'center',
-    elevation: 2,
+    borderBottomColor: '#F6CD5B',
+    alignItems: 'center',
+  },
+  headerimg: {
+    width: scale(100),
+    height: scale(30),
+    marginLeft: responsiveWidth(3),
+  },
+  headerback : {
+    width: scale(10),
+    height:scale(17)
   },
   modalBackground: {
     flex: 1,
-    elevation:9,
+    elevation: 9,
     justifyContent: 'flex-end', // Align the modal at the bottom
   },
   modalContainer: {
@@ -359,7 +409,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
-    
+
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -381,7 +431,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   popupheader: {
-    fontSize: 22,
+    fontSize: responsiveFontSize(3),
     fontWeight: 'bold',
     fontFamily: 'Roboto',
     color: '#111820',
@@ -390,14 +440,14 @@ const styles = StyleSheet.create({
     color: '#111820',
     fontWeight: 'bold',
     fontFamily: 'Oxygen',
-    fontSize: 24,
+    fontSize: responsiveFontSize(3),
   },
   text: {
     marginTop: 12,
     color: '#111820',
     fontWeight: 'bold',
     fontFamily: 'Oxygen',
-    fontSize: 18,
+    fontSize: responsiveFontSize(2.5),
   },
   image: {
     resizeMode: 'stretch',
@@ -405,13 +455,13 @@ const styles = StyleSheet.create({
     flex: 2,
   },
   popuptext: {
-    fontSize: 16,
+    fontSize: responsiveFontSize(2),
     fontFamily: 'Roboto',
     color: '#111820',
     marginTop: 5,
   },
   button: {
-    borderRadius: 24,
+    borderRadius: 50,
     backgroundColor: '#F6CD5B',
     elevation: 3,
     alignItems: 'center',
@@ -424,6 +474,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: {
+    fontSize: responsiveFontSize(2),
     fontWeight: 'bold',
     color: '#363333',
   },
