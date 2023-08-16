@@ -114,7 +114,7 @@ const Login = ({navigation}) => {
                   <TouchableOpacity
                     onPress={toggleShowPassword}
                     style={{marginRight: 15}}>
-                    <Image source={require('../../../Assets/icons/eye.png')} />
+                    <Image style={styles.eye} source={require('../../../Assets/icons/eye.png')} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -221,6 +221,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     backgroundColor: '#F7F7F7',
     borderRadius: 12,
+  },
+  eye: {
+    height: scale(9),
+    width: scale(12)
   },
   input: {
     

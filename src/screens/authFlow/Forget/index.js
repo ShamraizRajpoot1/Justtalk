@@ -8,15 +8,21 @@ import {
   Animated,
   Modal,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import React, {useState, useEffect} from 'react';
+import { firebase } from '@react-native-firebase/firestore';
+import {
+  responsiveHeight,
+  responsiveWidth,
+  responsiveFontSize,
+} from 'react-native-responsive-dimensions';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 const Forget = ({navigation}) => {
   const [slideAnimation] = useState(new Animated.Value(0));
   const [showLastView, setShowLastView] = useState(false);
-  const handleSendPasswordReset = () => {
-    setShowLastView(true);
-  };
+  const [emailValue, setEmailValue] = useState('');
 
   useEffect(() => {
     if (showLastView) {
@@ -27,6 +33,26 @@ const Forget = ({navigation}) => {
       }).start();
     }
   }, [showLastView, slideAnimation]);
+  const handleSendPasswordReset = async (email) => {
+    try {
+      const auth = firebase.auth();
+      const userExists = await auth.fetchSignInMethodsForEmail(email);
+      
+      if (userExists.length === 0) {
+        
+        console.log('User does not exist.');
+        Alert.alert('User does not exists');
+        return;
+      }
+      
+      await auth.sendPasswordResetEmail(email);
+      setShowLastView(true); 
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      
+    }
+  };
+  
   const MyModal = ({
     visible,
     onCloseModal,
@@ -102,7 +128,7 @@ const Forget = ({navigation}) => {
           }}>
           <Image
             source={require('../../../Assets/icons/back.png')}
-            style={{marginTop: 30}}
+            style={{}}
           />
         </TouchableOpacity>
 
@@ -121,12 +147,13 @@ const Forget = ({navigation}) => {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCompleteType="email"
+          onChangeText={text => setEmailValue(text)}
         />
       </View>
       <View style={{alignItems: 'center'}}>
         <TouchableOpacity
           style={styles.forgetbtn}
-          onPress={handleSendPasswordReset}>
+          onPress={() => handleSendPasswordReset(emailValue)}>
           <Text style={styles.btntext}>SEND PASSWORD RESET LINK</Text>
         </TouchableOpacity>
       </View>
@@ -138,8 +165,7 @@ const Forget = ({navigation}) => {
           imageSource={require('../../../Assets/icons/checkc2.png')}
           image={require('../../../Assets/icons/raveroom.png')}
           title="Password reset link sent "
-          title2 = "to your email"
-          
+          title2="to your email"
         />
       )}
     </View>
@@ -152,24 +178,25 @@ const styles = StyleSheet.create({
   container: {backgroundColor: '#ffffff', width: '100%', height: '100%'},
   header: {
     flexDirection: 'row',
-    height: 68,
+    alignItems:'center',
+    height: responsiveHeight(8),
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
   },
   headertext: {
     color: 'black',
-    marginTop: 25,
-    marginLeft: 70,
+    
+    marginLeft: responsiveWidth(5),
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: responsiveFontSize(1.5),
   },
   text: {
     color: 'black',
     marginTop: 30,
     fontWeight: 'bold',
-    fontSize: 24,
+    fontSize: responsiveFontSize(2),
   },
-  texts: {color: 'black', fontWeight: 'bold', fontSize: 24},
+  texts: {color: 'black', fontWeight: 'bold', fontSize: responsiveFontSize(2)},
   emailcontainer: {
     marginTop: 30,
     marginHorizontal: 20,
@@ -181,7 +208,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: '#444444',
     fontFamily: 'Roboto',
-    fontSize: 12,
+    fontSize: responsiveFontSize(1),
     fontWeight: 'bold',
   },
   input: {
@@ -189,16 +216,16 @@ const styles = StyleSheet.create({
     marginLeft: 13,
     color: '#222222',
     fontFamily: 'Roboto',
-    fontSize: 15,
+    fontSize: responsiveFontSize(1.3),
     fontWeight: 'normal',
   },
   forgetbtn: {
     backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 275,
-    height: 48,
-    borderRadius: 24,
+    width: responsiveWidth(50),
+    height: responsiveHeight(6),
+    borderRadius: 50,
     elevation: 3,
     borderColor: '#B7B7B780',
     marginTop: 30,
@@ -206,7 +233,7 @@ const styles = StyleSheet.create({
   btntext: {
     color: '#FFFFFF',
     fontFamily: 'Roboto',
-    fontSize: 15,
+    fontSize: responsiveFontSize(1.3),
     fontWeight: 'bold',
   },
   modalBackground: {
@@ -217,7 +244,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end', // Center the popup vertically
     alignItems: 'center',
-    
   },
   popup: {
     width: '100%', // Make the popup span the full width of the screen
@@ -227,7 +253,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation:9 
+    elevation: 19,
   },
   popupbody: {
     flex: 1,
@@ -235,13 +261,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   popupheader: {
-    fontSize: 24,
+    fontSize: responsiveFontSize(2),
     fontWeight: 'bold',
     fontFamily: 'Roboto',
     color: '#222222',
   },
   popuptext: {
-    fontSize: 16,
+    fontSize: responsiveFontSize(1.4),
     fontFamily: 'Roboto',
     color: '#111820',
     marginTop: 5,
@@ -250,14 +276,15 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '70%',
     justifyContent: 'center',
+    
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(1.3),
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
   button: {
-    borderRadius: 24,
+    borderRadius: 50,
     backgroundColor: '#363333',
     elevation: 3,
     alignItems: 'center',
@@ -265,12 +292,13 @@ const styles = StyleSheet.create({
     flex: 0.5,
   },
   imgview: {
-    flex:1,
+    flex: 1,
     alignItems: 'center',
-    justifyContent:'center'
+    justifyContent: 'center',
   },
-  image :{
-    resizeMode: 'stretch'
-  }
-  
+  image: {
+    height: responsiveHeight(6),
+    width: responsiveHeight(6),
+    resizeMode: 'stretch',
+  },
 });

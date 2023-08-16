@@ -31,6 +31,7 @@ const SignUp = ({navigation}) => {
   const [showPassword, setShowPassword] = useState(true);
   const [showView, setShowView] = useState(false);
   const [show2View, set2ShowView] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState(true);
 
   useEffect(() => {
     console.log('User: ', user);
@@ -71,9 +72,15 @@ const SignUp = ({navigation}) => {
     // if (initializing) setInitializing(false);
   };
   const Sign = async () => {
+    if (usernameAvailable) {
+      Alert.alert('Username is not available')
+      console.log('Username is not available');
+      return;
+    }
 
     if (password !== confirmPassword) {
       console.log("Passwords don't match");
+      Alert.alert("Passwords don't match")
       return;
     }
 
@@ -104,6 +111,26 @@ const SignUp = ({navigation}) => {
       //   : console.log('user not registered');
     
   };
+  const checkUsernameAvailability = async () => {
+    if (!name) {
+      setUsernameAvailable(true);
+      return;
+    }
+
+    try {
+      const usersSnapshot = await firestore()
+        .collection('Users')
+        .where('name', '==', name)
+        .get();
+
+      const isAvailable = usersSnapshot.empty; 
+      setUsernameAvailable(isAvailable);
+    } catch (error) {
+      console.error('Error checking username availability:', error);
+    }
+  };
+
+
   return (
     <>
       <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
@@ -135,22 +162,44 @@ const SignUp = ({navigation}) => {
                   autoCompleteType="email"
                 />
               </View>
-              <View style={[styles.email, {marginTop: 15}]}>
-                <Text style={styles.fieldtitle}>Username</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={userName => setName(userName)}
-                  placeholder="johndoe"
-                  placeholderTextColor="#222222"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCompleteType="email"
-                />
-              </View>
+              <View style={[styles.email, { marginTop: 15,borderColor: !usernameAvailable ? '#F7F7F7' : '#FF0000',borderWidth:2, }]}>
+      <Text style={styles.fieldtitle}>Username</Text>
+      <View
+        style={[
+          {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            
+          },
+        ]}
+      >
+        <TextInput
+          style={styles.input}
+          onChangeText={(userName) => {
+            setName(userName);
+            checkUsernameAvailability(); // Call the check function on every change
+          }}
+          placeholder="johndoe"
+          placeholderTextColor="#222222"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCompleteType="username" // Update the autoCompleteType
+        />
+        <View style={{ marginRight: 15 }}>
+          {!usernameAvailable ? (
+            <Image
+              style={styles.check}
+              source={require('../../../Assets/icons/checkc.png')}
+            />
+          ) : (null)}
+        </View>
+      </View>
+    </View>
+
               <View
                 onTouchStart={() => passwordInputRef.current.focus()}
                 style={styles.password}>
-                <Text style={styles.fieldtitle}>Password:</Text>
+                <Text style={styles.fieldtitle}>Password</Text>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -169,7 +218,7 @@ const SignUp = ({navigation}) => {
                   <TouchableOpacity
                     onPress={toggleShowPassword}
                     style={{marginRight: 15}}>
-                    <Image source={require('../../../Assets/icons/eye.png')} />
+                    <Image style={styles.eye} source={require('../../../Assets/icons/eye.png')} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -197,7 +246,7 @@ const SignUp = ({navigation}) => {
                   <TouchableOpacity
                     onPress={toggleShowPassword}
                     style={{marginRight: 15}}>
-                    <Image source={require('../../../Assets/icons/eye.png')} />
+                    <Image style={styles.eye} source={require('../../../Assets/icons/eye.png')} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -289,6 +338,7 @@ const styles = StyleSheet.create({
     height:responsiveHeight(10),
     marginHorizontal: 20,
     backgroundColor: '#F7F7F7',
+    
     borderRadius: 12,
   },
   password: {
@@ -298,6 +348,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     backgroundColor: '#F7F7F7',
     borderRadius: 12,
+  },
+  eye: {
+    height: scale(9),
+    width: scale(12)
   },
   input: {
     
@@ -383,5 +437,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: responsiveFontSize(2),
     color: '#FFFFFF',
+  },
+  check: {
+    width: scale(15),
+    height: scale(16),
   },
 });

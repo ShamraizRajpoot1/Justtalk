@@ -1,6 +1,6 @@
-import { useRoute } from '@react-navigation/native';
-import React, { useState, useEffect, useContext } from 'react';
-import { 
+import {useRoute} from '@react-navigation/native';
+import React, {useState, useEffect, useContext} from 'react';
+import {
   StyleSheet,
   Text,
   View,
@@ -12,41 +12,41 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
-import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
-import { responsiveFontSize } from 'react-native-responsive-dimensions';
+import {scale} from 'react-native-size-matters';
+import {
+  responsiveHeight,
+  responsiveWidth,
+} from 'react-native-responsive-dimensions';
+import {responsiveFontSize} from 'react-native-responsive-dimensions';
 import firestore from '@react-native-firebase/firestore';
 import SendIcon from '../../../Assets/icons/send.png';
-import { AuthContext } from '../../../Navigation/AuthProvider';
+import {AuthContext} from '../../../Navigation/AuthProvider';
 
-export default function Chats({ navigation }) {
+export default function Chats({navigation}) {
   const {user, logout} = useContext(AuthContext);
   const route = useRoute();
-  const { image, title, groupId } = route.params;
-  const [chatUser] = useState({
-    name: 'Robert Henry',
-    profile_image: 'https://randomuser.me/api/portraits/men/0.jpg',
-    last_seen: 'online',
-  });
+  const {image, title, groupId} = route.params;
+  
   const [userName, setUserName] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [unsubscribe, setUnsubscribe] = useState(null);
-  const [groupMembers, setGroupMembers] = useState('')
-  
+  const [groupMembers, setGroupMembers] = useState('');
+
   useEffect(() => {
     if (user) {
       setCurrentUser(user);
     }
-  
+
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
   }, []);
-  
-  async function refresh(){
+
+  async function refresh() {
     // Set up an interval to refresh the screen every 2 seconds
     const intervalId = setInterval(() => {
       // Fetch data or perform any actions here
@@ -58,6 +58,12 @@ export default function Chats({ navigation }) {
       clearInterval(intervalId);
     };
   }
+
+  useEffect(() => {
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, [user]);
 
   useEffect(() => {
     const unsubscribeRef = firestore()
@@ -76,16 +82,12 @@ export default function Chats({ navigation }) {
         setMessages(messagesData);
       });
 
-    setUnsubscribe(unsubscribeRef);
-
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
+      if (unsubscribeRef) {
+        unsubscribeRef();
       }
     };
   }, [groupId]);
-
-  
 
   function getTime(date) {
     var utcHours = date.getUTCHours();
@@ -103,9 +105,9 @@ export default function Chats({ navigation }) {
       .doc(groupId)
       .collection('chats')
       .orderBy('timestamp', 'asc')
-      .onSnapshot((querySnapshot) => {
+      .onSnapshot(querySnapshot => {
         const messagesData = [];
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach(doc => {
           messagesData.push({
             id: doc.id,
             ...doc.data(),
@@ -122,29 +124,45 @@ export default function Chats({ navigation }) {
     if (inputMessage === '') {
       return setInputMessage('');
     }
-
+  
     const t = getTime(new Date());
-   
+     
     const newMessage = {
       sender: currentUser.uid, // Using the current user's ID
       message: inputMessage,
       time: t,
       timestamp: firestore.FieldValue.serverTimestamp(),
-      
     };
-    
   
-
-    const groupId = route.params.groupId; // Replace with your method to get the group ID
+    const groupId = route.params.groupId;
+    
+    // Fetch the sender's profile image URL from Firestore
     firestore()
-      .collection('Groups')
-      .doc(groupId)
-      .collection('chats')
-      .add(newMessage);
-
-    setInputMessage('');
-    countMembers()
-  }
+      .collection('Users') // Assuming the user profile data is stored in the 'Users' collection
+      .doc(currentUser.uid)
+      .get()
+      .then(userDocSnapshot => {
+        if (userDocSnapshot.exists) {
+          const senderProfileImage = userDocSnapshot.get('userImage');
+          
+          // Add the sender's profile image to the new message
+          newMessage.senderProfileImage = senderProfileImage;
+  
+          // Add the new message to the chat collection
+          firestore()
+            .collection('Groups')
+            .doc(groupId)
+            .collection('chats')
+            .add(newMessage);
+          
+          setInputMessage('');
+          countMembers();
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching sender profile image:', error);
+      });
+  } 
   async function getGroupName(groupId) {
     try {
       const groupDocRef = firestore().collection('Groups').doc(groupId);
@@ -153,7 +171,7 @@ export default function Chats({ navigation }) {
       if (groupDocSnapshot.exists) {
         const userName = groupDocSnapshot.get('Name');
         setUserName(userName);
-        console.log('name' , userName)
+        console.log('name', userName);
       } else {
         console.log('Group document does not exist');
       }
@@ -164,19 +182,16 @@ export default function Chats({ navigation }) {
   useEffect(() => {
     getGroupName(groupId);
   }, [groupId]);
-  async function countMembers(){
-    const groupId = route.params.groupId; // Replace with your method to get the group ID
-
-    // Query the chats subcollection of the group document
+  async function countMembers() {
+    const groupId = route.params.groupId;
     firestore()
       .collection('Groups')
       .doc(groupId)
       .collection('chats')
       .get()
       .then(querySnapshot => {
-        // Create a set to store unique senders
         const uniqueSenders = new Set();
-    
+
         // Iterate through the messages and add unique senders to the set
         querySnapshot.forEach(doc => {
           const sender = doc.data().sender;
@@ -184,7 +199,7 @@ export default function Chats({ navigation }) {
             uniqueSenders.add(sender);
           }
         });
-    
+
         // Get the count of unique senders
         const numberOfUniqueSenders = uniqueSenders.size;
         setGroupMembers(numberOfUniqueSenders);
@@ -206,7 +221,10 @@ export default function Chats({ navigation }) {
             onPress={() => {
               navigation.navigate('Home');
             }}>
-            <Image source={require('../../../Assets/icons/back.png')} />
+            <Image
+              style={styles.headerback}
+              source={require('../../../Assets/icons/back.png')}
+            />
           </TouchableOpacity>
           <Image source={image} style={{marginLeft: 8}} />
           <View style={styles.headertitle}>
@@ -215,58 +233,57 @@ export default function Chats({ navigation }) {
           </View>
         </View>
         <FlatList
-          style={{backgroundColor: '#f2f2ff'}}
+          style={{ backgroundColor: '#f2f2ff' }}
           data={JSON.parse(JSON.stringify(messages)).reverse()}
-        keyExtractor={(item) => item.id}
-         
-          renderItem={({item}) => (
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
             <TouchableWithoutFeedback>
               <View
                 style={{
                   marginTop: 6,
                   flexDirection: 'row',
                   justifyContent:
-                    item.sender === currentUser.uid
-                      ? 'flex-end'
-                      : 'flex-start',
+                    item.sender === currentUser.uid ? 'flex-end' : 'flex-start',
                 }}>
                 <View
                   style={[
                     styles.smscontainer,
                     {
                       backgroundColor:
-                        item.sender === currentUser.uid
-                          ? '#FFE7A3'
-                          : '#FFFFFF',
+                        item.sender === currentUser.uid ? '#FFE7A3' : '#FFFFFF',
                       alignSelf:
-                        item.sender === currentUser.uid
-                          ? 'flex-end'
-                          : 'flex-start',
+                        item.sender === currentUser.uid ? 'flex-end' : 'flex-start',
                     },
                   ]}>
-                  {item.sender !== currentUser.uid && (
-                    <Image
-                      style={styles.profileimg}
-                      source={{uri: chatUser.profile_image}}
-                    />
-                  )}
+                      {item.sender !== currentUser.uid && (
+                  <Image
+                    style={styles.profileimg}
+                    source={
+                      item.senderProfileImage
+                        ? { uri: item.senderProfileImage }
+                        : require('../../../Assets/icons/user.png') 
+                    }
+                  />
+                      )}
                   <Text
                     style={[
                       styles.smstext,
                       {
                         color:
-                          item.sender === currentUser.uid
-                            ? '#111820'
-                            : '#000000',
+                          item.sender === currentUser.uid ? '#111820' : '#000000',
                       },
                     ]}>
                     {item.message}
                   </Text>
                   {item.sender === currentUser.uid && (
-                    <Image
-                      style={styles.profileimg}
-                      source={{uri: chatUser.profile_image}}
-                    />
+                  <Image
+                    style={styles.profileimg}
+                    source={
+                      item.senderProfileImage
+                        ? { uri: item.senderProfileImage }
+                        : require('../../../Assets/icons/user.png') 
+                    }
+                  />
                   )}
                 </View>
               </View>
@@ -275,7 +292,7 @@ export default function Chats({ navigation }) {
           inverted
         />
 
-        <View style={{paddingVertical: 10,}}>
+        <View style={{paddingVertical: 10}}>
           <View style={styles.messageInputView}>
             <TextInput
               defaultValue={inputMessage}
@@ -285,7 +302,6 @@ export default function Chats({ navigation }) {
               onChangeText={text => setInputMessage(text)}
               onSubmitEditing={() => {
                 sendMessage();
-                
               }}
             />
 
@@ -307,15 +323,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  headerback: {
+    width: scale(10),
+    height: scale(17),
+  },
   boldtext: {
     color: '#111820',
-    fontSize : responsiveFontSize(2),
+    fontSize: responsiveFontSize(2),
     fontWeight: 'bold',
-    width: '100%'
+    width: '100%',
   },
-  text : {
+  text: {
     fontSize: responsiveFontSize(1.5),
-    color:'#111820'
+    color: '#111820',
   },
   userProfileImage: {height: '100%', aspectRatio: 1, borderRadius: 100},
   container: {
@@ -324,7 +344,7 @@ const styles = StyleSheet.create({
   },
   messageInputView: {
     display: 'flex',
-    height:70,
+    height: responsiveHeight(7),
     flexDirection: 'row',
     marginHorizontal: 14,
     backgroundColor: '#363333',
@@ -337,21 +357,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   messageSendView: {
-
     justifyContent: 'center',
   },
   send: {
-    width: 70,
+    width: responsiveHeight(7),
     backgroundColor: '#F6CD5B',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 100,
   },
- 
+
   profileimg: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: responsiveHeight(6),
+    height: responsiveHeight(6),
+    borderRadius: 50,
     alignSelf: 'flex-start',
   },
   header: {
@@ -369,7 +388,7 @@ const styles = StyleSheet.create({
   smscontainer: {
     maxWidth: Dimensions.get('screen').width * 0.8,
     marginHorizontal: 10,
-    borderRadius: 25,
+    borderRadius: 50,
     flexDirection: 'row',
     alignItems: 'center',
   },
